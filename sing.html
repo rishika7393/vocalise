@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sing back — Vocalise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="wordmark">Vocalise</span>
+    <nav>
+      <a href="index.html">Practice</a>
+      <a href="sing.html" aria-current="page">Sing back</a>
+    </nav>
+    <span class="nowset" id="nowset"></span>
+  </header>
+
+  <div class="notice bad" id="notice" hidden></div>
+  <div class="notice info" id="micnotice">
+    This page listens through your microphone. Nothing is recorded or sent anywhere — audio is analysed locally and discarded.
+  </div>
+
+  <div class="main">
+    <section class="stage">
+
+      <!-- readout -->
+      <div class="readout">
+        <div class="pitch idle" id="pitch">—</div>
+        <div class="gloss" id="gloss"></div>
+      </div>
+
+      <!-- contour: shows expected shape + colour-coded results -->
+      <svg class="contour" id="contour" preserveAspectRatio="none" aria-label="Note sequence"></svg>
+
+      <!-- keyboard -->
+      <div class="kb" id="kb"></div>
+
+      <!-- tuner bar -->
+      <div class="tuner off" id="tuner">
+        <div class="zone" id="zone"></div>
+        <div class="centre"></div>
+        <div class="needle" id="needle"></div>
+        <div class="scale"><span>−50¢</span><span>flat</span><span>in tune</span><span>sharp</span><span>+50¢</span></div>
+      </div>
+      <div class="centsread" id="centsread">Turn on the microphone to begin.</div>
+
+      <!-- singstrip: task / tempo / mode -->
+      <div class="strip singstrip">
+        <div class="seg" id="taskseg" role="group" aria-label="Mode">
+          <button data-task="back" aria-pressed="true">Sing back</button>
+          <button data-task="capture" aria-pressed="false">Build by singing</button>
+        </div>
+        <div class="tempo" id="tempowrap">
+          <button id="bpmdown" aria-label="Slower">−</button>
+          <div class="bpm" id="bpmread"></div>
+          <button id="bpmup" aria-label="Faster">+</button>
+        </div>
+        <div class="seg" id="passseg" role="group" aria-label="Passes">
+          <button data-mode="learn" aria-pressed="true">One pass</button>
+          <button data-mode="practice" aria-pressed="false">Ladder</button>
+        </div>
+      </div>
+
+      <!-- transport -->
+      <div class="transport">
+        <button class="play" id="mic">Turn on microphone</button>
+        <button class="play" id="go" hidden>Start</button>
+        <button class="ghost" id="stop" hidden>Stop</button>
+      </div>
+
+      <!-- per-note scores -->
+      <div class="score" id="score"></div>
+      <div class="summary" id="summary"></div>
+
+      <!-- rep history chart — visible after ≥1 complete pass -->
+      <div id="histwrap" style="display:none">
+        <div style="font-size:.8rem;color:var(--dim);margin:.4rem 0 .3rem">Rep history (last 20)</div>
+        <div class="rephistory"><svg id="histsvg" height="80"></svg></div>
+      </div>
+    </section>
+
+    <aside class="desk">
+      <div class="tabs" role="tablist">
+        <button role="tab" data-pane="what" aria-selected="true">Exercise</button>
+        <button role="tab" data-pane="capture" aria-selected="false">Build by singing</button>
+      </div>
+
+      <div class="pane" id="pane-what" role="tabpanel">
+        <div class="group">
+          <h2 class="gtitle">Exercise</h2>
+          <p class="hint" id="exsummary"></p>
+          <div class="row" style="margin-top:.6rem">
+            <label for="pick">Load saved</label>
+            <select id="pick"></select>
+          </div>
+          <p class="hint">Build new exercises on the <a href="index.html">Practice</a> page.</p>
+        </div>
+        <div class="group">
+          <h2 class="gtitle">How scoring works</h2>
+          <p class="hint">The starting note plays. Four counted beats. Then you sing while the app listens.<br>Each note is judged on the steady middle of your tone. Within 25¢ = on pitch, within 50¢ = close. Octaves fold together so singing an octave down is fine.</p>
+        </div>
+        <div class="group">
+          <h2 class="gtitle">Voice range</h2>
+          <div class="row">
+            <label for="lowhz">Lowest note</label>
+            <select id="lowhz">
+              <option value="60">Bass — down to B1</option>
+              <option value="80" selected>General — down to E2</option>
+              <option value="130">High voice — down to C3</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-capture" role="tabpanel" hidden>
+        <div class="group">
+          <h2 class="gtitle">Sing a phrase</h2>
+          <p class="hint">Press Record below and sing the shape you want to practise. Leave a small gap between notes — two pitches sung joined read as one long note.</p>
+          <div class="row">
+            <label for="captonic">Tonic</label>
+            <select id="captonic">
+              <option value="first">My first note</option>
+              <option value="setup">The key set on Practice</option>
+            </select>
+          </div>
+          <div class="row">
+            <label for="capscale">Scale</label>
+            <select id="capscale"></select>
+          </div>
+        </div>
+        <div class="group">
+          <h2 class="gtitle">Captured</h2>
+          <div class="seqbox" id="capbox"></div>
+          <p class="hint" id="capdegrees"></p>
+          <div class="row">
+            <button class="chip" id="capundo">Undo</button>
+            <button class="chip" id="capclear">Clear</button>
+            <button class="chip" id="capuse">Use as exercise</button>
+          </div>
+          <p class="hint" id="capnote"></p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+<script type="module" src="js/sing.js"></script>
+</body>
+</html>
