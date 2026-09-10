@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vocalise — scale practice for voice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="wordmark">Vocalise</span>
+    <nav>
+      <a href="index.html" aria-current="page">Practice</a>
+      <a href="sing.html">Sing back</a>
+    </nav>
+    <span class="nowset" id="nowset"></span>
+  </header>
+
+  <div class="notice bad" id="notice" hidden></div>
+
+  <div class="main">
+    <!-- ======== performance surface ======== -->
+    <section class="stage">
+
+      <!-- 1. big note readout -->
+      <div class="readout">
+        <div class="pitch idle" id="pitch">—</div>
+        <div class="gloss" id="gloss"></div>
+      </div>
+
+      <!-- 2. sequence contour -->
+      <svg class="contour" id="contour" preserveAspectRatio="none" aria-label="Sequence shape"></svg>
+
+      <!-- 3. piano keyboard -->
+      <div class="kb" id="kb"></div>
+
+      <!-- 4. transport strip — mode / tempo / options / start -->
+      <div class="strip">
+        <div class="seg" id="modeseg" role="group" aria-label="Mode">
+          <button data-mode="learn">Learn</button>
+          <button data-mode="loop">Loop</button>
+          <button data-mode="ladder">Ladder</button>
+        </div>
+
+        <div class="tempo">
+          <button id="bpmdown" aria-label="Slower">−</button>
+          <div class="bpm" id="bpmread" title="Drag up/down to change tempo" tabindex="0" role="spinbutton" aria-label="Tempo"></div>
+          <button id="bpmup" aria-label="Faster">+</button>
+          <button class="tap" id="tap">tap</button>
+        </div>
+
+        <div class="seg" id="subdivseg" role="group" aria-label="Default note length">
+          <button data-t="4"  title="Whole beat">♩</button>
+          <button data-t="2"  title="Half beat">♪</button>
+          <button data-t="1"  title="Quarter beat">𝅘𝅥𝅯</button>
+        </div>
+
+        <button class="toggle" id="metro" aria-pressed="false" title="Metronome" aria-label="Metronome">
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+            <path d="M6 2h4l3 12H3z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+            <path d="M8 12 10.5 4" stroke="currentColor" stroke-width="1.4"/>
+          </svg>
+        </button>
+        <button class="toggle" id="drone" aria-pressed="false" title="Drone on tonic" aria-label="Drone">
+          <svg viewBox="0 0 18 16" width="17" height="15" aria-hidden="true">
+            <path d="M1 8q2-5 4 0t4 0t4 0t4 0" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="transport">
+        <button class="play" id="play">Start</button>
+        <button class="ghost" id="turn" disabled>Turn around</button>
+      </div>
+
+      <!-- 5. ladder -->
+      <div class="ladder">
+        <div class="track" id="rungs"></div>
+        <div class="meta">
+          <span id="ladderpos">Ready</span>
+          <span class="dir" id="ladderdir"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======== setup panel ======== -->
+    <aside class="desk">
+      <!-- single tab list: just Exercise and Settings now -->
+      <div class="tabs" role="tablist">
+        <button role="tab" data-pane="exercise" aria-selected="true">Exercise</button>
+        <button role="tab" data-pane="settings" aria-selected="false">Settings</button>
+      </div>
+
+      <!-- ============ exercise ============ -->
+      <div class="pane" id="pane-exercise" role="tabpanel">
+
+        <!-- quick command -->
+        <div class="group">
+          <div class="growtitle">
+            <h2 class="gtitle">Quick set</h2>
+            <button class="ibutton" data-tip="quick">ⓘ</button>
+          </div>
+          <div class="tiptxt" id="tip-quick" hidden>Type a key, scale, degrees and tempo in any order. Degree <code>5*4</code> holds four times as long as the default.</div>
+          <div class="cmd">
+            <input id="cmd" placeholder="D dorian 1 2 3 4 5*4 at 88bpm" autocomplete="off" spellcheck="false">
+            <button id="cmdgo">Go</button>
+          </div>
+        </div>
+
+        <!-- key & scale -->
+        <div class="group">
+          <div class="growtitle">
+            <h2 class="gtitle">Key and scale</h2>
+            <button class="ibutton" data-tip="key">ⓘ</button>
+          </div>
+          <div class="tiptxt" id="tip-key" hidden>Pick the root note then choose which octave you want to start on, and which scale.</div>
+          <div class="chips" id="roots"></div>
+          <div class="row">
+            <label for="oct">Start on</label>
+            <select id="oct"></select>
+            <label for="scale" style="margin-left:.5rem">Scale</label>
+            <select id="scale"></select>
+          </div>
+        </div>
+
+        <!-- sequence builder -->
+        <div class="group">
+          <div class="growtitle">
+            <h2 class="gtitle">Sequence</h2>
+            <button class="ibutton" data-tip="seq">ⓘ</button>
+          </div>
+          <div class="tiptxt" id="tip-seq" hidden>Up to 12 notes. Tap a step to select it, then change its length below. Tap a dot in the contour to jump there mid-exercise, or to hear a note when stopped.</div>
+          <div class="seqbox" id="seqbox"></div>
+          <div class="lenrow">
+            <span class="lbl" id="lenlabel">Note length</span>
+            <div class="chips" id="lenchips"></div>
+            <div style="margin-left:auto;display:flex;gap:4px">
+              <button class="chip" id="undo">⌫</button>
+              <button class="chip" id="evenout" title="Set all to same length">≡</button>
+              <button class="chip" id="clear">✕</button>
+            </div>
+          </div>
+          <div class="chips deggrid" id="degrees"></div>
+          <div class="row" style="margin-top:.5rem">
+            <label for="octshift">Octave</label>
+            <select id="octshift">
+              <option value="-1">below</option>
+              <option value="0" selected>middle</option>
+              <option value="1">above</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- save + presets merged -->
+        <div class="group">
+          <div class="growtitle">
+            <h2 class="gtitle">Exercises</h2>
+            <button class="ibutton" data-tip="lib">ⓘ</button>
+          </div>
+          <div class="tiptxt" id="tip-lib" hidden>Your saved exercises appear above the built-in presets. Give the current exercise a name and press Save.</div>
+          <div class="cmd" style="margin-bottom:.6rem">
+            <input id="savename" placeholder="Name this exercise…" autocomplete="off" maxlength="48">
+            <button id="savego">Save</button>
+          </div>
+          <select id="preset" size="6" style="width:100%;background:var(--ground);border:1px solid var(--line);border-radius:3px;color:var(--ivory);font-size:.84rem;padding:.3rem 0"></select>
+          <div style="margin-top:.4rem;display:flex;gap:6px">
+            <button class="chip" id="presload" style="flex:1">Load</button>
+            <button class="chip" id="presdel" id="presdel" style="color:var(--rose)">Delete</button>
+          </div>
+          <p class="hint" id="prestempty" style="margin-top:.5rem" hidden>No saved exercises yet.</p>
+        </div>
+      </div><!-- /pane-exercise -->
+
+      <!-- ============ settings ============ -->
+      <div class="pane" id="pane-settings" role="tabpanel" hidden>
+        <div class="group">
+          <h2 class="gtitle">Practice range</h2>
+          <div class="row">
+            <label for="up">Climb to</label>
+            <input type="range" id="up" min="0" max="15" step="1">
+            <span class="val" id="upval"></span>
+          </div>
+          <div class="row">
+            <label for="down">Drop to</label>
+            <input type="range" id="down" min="-15" max="0" step="1">
+            <span class="val" id="downval"></span>
+          </div>
+          <label class="switch"><input type="checkbox" id="playroot"> Play starting note before each pass</label>
+          <label class="switch"><input type="checkbox" id="stopend"> Stop after the way down</label>
+          <label class="switch"><input type="checkbox" id="countin"> Count in (4 beats) before practice</label>
+          <label class="switch"><input type="checkbox" id="sticky"> Sticky notes — hold on each note until sung in tune</label>
+        </div>
+        <div class="group">
+          <h2 class="gtitle">Sound</h2>
+          <div class="row">
+            <label for="voice">Tone</label>
+            <select id="voice">
+              <option value="triangle">Reed</option>
+              <option value="sine">Pure</option>
+              <option value="fmsine">Bell</option>
+              <option value="sawtooth">Bright</option>
+            </select>
+          </div>
+          <div class="row">
+            <label for="vol">Volume</label>
+            <input type="range" id="vol" min="-40" max="4" step="1">
+            <span class="val" id="volval"></span>
+          </div>
+        </div>
+        <div class="group">
+          <h2 class="gtitle">Shortcuts</h2>
+          <p class="hint"><code>space</code> start/stop · <code>↑↓</code> move root · <code>←→</code> tempo · <code>t</code> turn around</p>
+          <p class="hint" id="storenote"></p>
+        </div>
+        <div class="group">
+          <h2 class="gtitle">Export / import exercises</h2>
+          <p class="hint">Export saves all your exercises to a <code>.json</code> file you can keep as a backup or copy to another device. Import merges exercises from a file — it won't delete what you already have.</p>
+          <div class="row" style="margin-top:.7rem;gap:.5rem">
+            <button class="chip" id="exportbtn" style="flex:1">Export all</button>
+            <button class="chip" id="importbtn" style="flex:1">Import from file</button>
+            <input type="file" id="importfile" accept=".json" style="display:none">
+          </div>
+          <p class="hint" id="importresult" style="display:none"></p>
+      </div>
+    </aside>
+  </div>
+</div>
+<script type="module" src="js/practice.js"></script>
+</body>
+</html>
