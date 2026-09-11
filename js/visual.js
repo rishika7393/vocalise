@@ -64,9 +64,8 @@ export function paintKeys(el, tonicPc, steps, marks = []){
   });
 }
 
-// Notes are placed on a real timeline, so a mixed rhythm looks like one. Each
-// note gets a wide transparent hit circle carrying data-seq, which the pages
-// delegate off to jump the run to that note.
+// Notes are placed on a real timeline so a mixed rhythm looks like one. Each
+// note gets a wide transparent hit circle carrying data-seq.
 // opts: { active: seqIndex, results: { [seqIndex]: 'hit'|'near'|'miss' }, pickable: bool }
 export function paintContour(svg, sequence, steps, opts = {}){
   const { active = -1, results = {}, pickable = true } = opts;
@@ -81,32 +80,52 @@ export function paintContour(svg, sequence, steps, opts = {}){
   if (!items.length){ svg.innerHTML = ''; return; }
 
   const total = Math.max(1, cursor);
-  const vals = items.map(o => o.semi);
-  const min = Math.min(...vals), max = Math.max(...vals);
-  const span = Math.max(1, max - min);
-  const W = 1000, H = 110, padY = 26, padX = 30;
+  const vals  = items.map(o => o.semi);
+  const min   = Math.min(...vals), max = Math.max(...vals);
+  // Enforce a minimum vertical span so a flat sequence (all same pitch) shows
+  // as dots in the middle rather than a distracting horizontal line.
+  const span  = Math.max(4, max - min);
+  const W = 1000, H = 100, padY = 22, padX = 36;
   const inner = W - padX * 2;
-  const x = tick => padX + (tick / total) * inner;
-  const y = v => H - padY - ((v - min) / span) * (H - padY * 2);
+  const midY  = H / 2;
+  const x  = tick => padX + (tick / total) * inner;
+  // Centre the sequence vertically when span is small (all same note etc.)
+  const yRange = H - padY * 2;
+  const yBase  = max === min ? midY : H - padY;
+  const y  = v => max === min ? midY : yBase - ((v - min) / span) * yRange;
 
-  const pts = items.map(o => x(o.start + o.len / 2) + ',' + y(o.semi)).join(' ');
-  let out = '<polyline class="path" points="' + pts + '"/>';
+  // Curved path through note centres
+  const pts = items.map(o => x(o.start + o.len / 2) + ',' + y(o.semi));
 
+  // Build a smooth SVG path with cubic bezier curves between points
+  let pathD = '';
+  if (pts.length === 1){
+    pathD = 'M' + pts[0];
+  } else {
+    pathD = 'M' + pts[0];
+    for (let i = 0; i < pts.length - 1; i++){
+      const [x0, y0] = pts[i].split(',').map(Number);
+      const [x1, y1] = pts[i + 1].split(',').map(Number);
+      const cpx = (x0 + x1) / 2;
+      pathD += ' C' + cpx + ',' + y0 + ' ' + cpx + ',' + y1 + ' ' + x1 + ',' + y1;
+    }
+  }
+
+  let out = '<path class="path" d="' + pathD + '" fill="none"/>';
+
+  // Draw dots on top of the path (z-order: path first, then dots)
   items.forEach(o => {
-    const cx = x(o.start + o.len / 2), cy = y(o.semi);
-    const on = o.i === active;
+    const cx  = x(o.start + o.len / 2), cy = y(o.semi);
+    const on  = o.i === active;
     const res = results[o.i];
     const done = active >= 0 && o.i < active;
-    const cls = res || (on ? 'on' : done ? 'done' : '');
+    const cls  = res || (on ? 'on' : done ? 'done' : '');
 
-    // A bar showing how long the note is held.
-    const x1 = x(o.start) + 2, x2 = Math.max(x1 + 2, x(o.start + o.len) - 2);
-    out += '<line class="bar ' + cls + '" x1="' + x1 + '" y1="' + cy + '" x2="' + x2 + '" y2="' + cy + '"/>';
     out += '<circle class="dot ' + cls + '" cx="' + cx + '" cy="' + cy + '" r="' + (on ? 8 : 5.5) + '"/>';
     out += '<text class="num' + (on ? ' on' : '') + '" x="' + cx + '" y="' + (H - 4) + '">' + o.d + '</text>';
     if (pickable){
       out += '<circle class="hit" cx="' + cx + '" cy="' + cy + '" r="22" data-seq="' + o.i +
-             '" tabindex="0" role="button"><title>Restart the pass from degree ' + o.d + '</title></circle>';
+             '" tabindex="0" role="button"><title>Jump to degree ' + o.d + '</title></circle>';
     }
   });
 
