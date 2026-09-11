@@ -32,7 +32,7 @@ nav a[aria-current=page]{background:var(--raise);color:var(--ivory)}
 .nowset b{color:var(--ivory);font-weight:500}
 
 .main{flex:1;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(330px,.85fr)}
-.stage{padding:1rem 1.4rem 1.5rem;display:flex;flex-direction:column;gap:.9rem;min-width:0}
+.stage{padding:1.2rem 1.4rem 2.5rem;display:flex;flex-direction:column;gap:.75rem;min-width:0}
 .desk{background:var(--panel);border-left:1px solid var(--line);padding:0 1.3rem 2rem;min-width:0;overflow-y:auto;max-height:calc(100vh - 49px)}
 
 /* readout */
@@ -54,19 +54,13 @@ nav a[aria-current=page]{background:var(--raise);color:var(--ivory)}
 .contour .dot.hit{fill:var(--good);stroke:var(--good)}
 .contour .dot.near{fill:var(--brass);stroke:var(--brass)}
 .contour .dot.miss{fill:var(--rose);stroke:var(--rose)}
-.contour .bar{stroke:var(--line);stroke-width:3;stroke-linecap:round}
-.contour .bar.on{stroke:var(--brass)}
-.contour .bar.done{stroke:var(--raise)}
-.contour .bar.hit{stroke:var(--good)}
-.contour .bar.near{stroke:var(--brass)}
-.contour .bar.miss{stroke:var(--rose)}
 .contour .num{fill:var(--dim);font-size:10px;font-family:var(--sans);text-anchor:middle}
 .contour .num.on{fill:var(--brass)}
 /* invisible fat hit area on each dot */
 .contour .hit{fill:transparent;cursor:pointer}
 .contour .hit:focus-visible{outline:none;fill:var(--brass);fill-opacity:.14}
 
-/* piano keyboard — now playable */
+/* piano keyboard â€” now playable */
 .kb{position:relative;height:90px;user-select:none;touch-action:none}
 .kb .whites{display:flex;height:100%;gap:1px}
 .kb .w{
@@ -161,7 +155,7 @@ nav a[aria-current=page]{background:var(--raise);color:var(--ivory)}
 .group{padding:1rem 0;border-bottom:1px solid var(--line)}
 .group:last-child{border-bottom:none}
 
-/* growtitle: heading + ⓘ in one row */
+/* growtitle: heading + â“˜ in one row */
 .growtitle{display:flex;align-items:baseline;gap:.4rem;margin-bottom:.6rem}
 .gtitle{font-family:var(--serif);font-size:1.05rem;font-weight:600;margin:0}
 .ibutton{color:var(--dim);font-size:.8rem;line-height:1;padding:0 .15rem;opacity:.7;transition:opacity .12s}
@@ -212,7 +206,7 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border:none;border-ra
 #preset{background:var(--ground);border:1px solid var(--line);border-radius:3px;color:var(--ivory);font-size:.83rem;padding:.3rem 0}
 #preset option{padding:.28rem .55rem;cursor:pointer}
 #preset option.saved-opt{color:var(--brass);font-weight:500}
-#preset option.saved-opt::before{content:"★ "}
+#preset option.saved-opt::before{content:"â˜… "}
 
 /* switch / checkbox */
 .switch{display:flex;align-items:center;gap:.55rem;margin-top:.55rem;font-size:.82rem;color:var(--dim);cursor:pointer}
