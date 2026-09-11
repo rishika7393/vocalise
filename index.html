@@ -38,7 +38,19 @@
       <!-- 3. piano keyboard -->
       <div class="kb" id="kb"></div>
 
-      <!-- 4. transport strip — mode / tempo / options / start -->
+      <!-- 4. ladder — progress through semitones -->
+      <div class="ladder">
+        <div class="track" id="rungs"></div>
+        <div class="meta">
+          <span id="ladderpos">Ready</span>
+          <span class="dir" id="ladderdir"></span>
+        </div>
+      </div>
+
+      <!-- breathing room -->
+      <div style="height:.6rem"></div>
+
+      <!-- 5. transport strip — mode / tempo / options -->
       <div class="strip">
         <div class="seg" id="modeseg" role="group" aria-label="Mode">
           <button data-mode="learn">Learn</button>
@@ -56,7 +68,14 @@
         <div class="seg" id="subdivseg" role="group" aria-label="Default note length">
           <button data-t="4"  title="Whole beat">♩</button>
           <button data-t="2"  title="Half beat">♪</button>
-          <button data-t="1"  title="Quarter beat">𝅘𝅥𝅯</button>
+          <button data-t="1"  title="Quarter beat">
+            <svg viewBox="0 0 10 16" width="9" height="14" aria-hidden="true" style="display:inline-block;vertical-align:middle">
+              <line x1="3" y1="2" x2="3" y2="14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <ellipse cx="3" cy="14" rx="3" ry="2" fill="currentColor"/>
+              <path d="M3 2 Q10 4 9 9 Q6 7 3 8" fill="currentColor"/>
+              <path d="M3 6 Q10 8 9 13 Q6 11 3 12" fill="currentColor"/>
+            </svg>
+          </button>
         </div>
 
         <button class="toggle" id="metro" aria-pressed="false" title="Metronome" aria-label="Metronome">
@@ -72,18 +91,10 @@
         </button>
       </div>
 
+      <!-- 6. start / turn around -->
       <div class="transport">
         <button class="play" id="play">Start</button>
         <button class="ghost" id="turn" disabled>Turn around</button>
-      </div>
-
-      <!-- 5. ladder -->
-      <div class="ladder">
-        <div class="track" id="rungs"></div>
-        <div class="meta">
-          <span id="ladderpos">Ready</span>
-          <span class="dir" id="ladderdir"></span>
-        </div>
       </div>
     </section>
 
@@ -168,8 +179,8 @@
           </div>
           <select id="preset" size="6" style="width:100%;background:var(--ground);border:1px solid var(--line);border-radius:3px;color:var(--ivory);font-size:.84rem;padding:.3rem 0"></select>
           <div style="margin-top:.4rem;display:flex;gap:6px">
-            <button class="chip" id="presload" style="flex:1">Load</button>
-            <button class="chip" id="presdel" id="presdel" style="color:var(--rose)">Delete</button>
+            <button class="chip" id="presload" style="flex:1;transition:background .15s,color .15s">Load</button>
+            <button class="chip" id="presdel" style="color:var(--rose)">Delete</button>
           </div>
           <p class="hint" id="prestempty" style="margin-top:.5rem" hidden>No saved exercises yet.</p>
         </div>
